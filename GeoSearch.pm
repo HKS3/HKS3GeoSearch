@@ -108,6 +108,10 @@ sub opac_js {
         biblionumbers.push( $(this).attr("data-biblionumber") );
       });
       console.log(biblionumbers);
+      if (biblionumbers.length === 0) {
+        return;
+      }
+
       $(function(e) {
         var ajaxData = { 'bn': biblionumbers };
         $.ajax({
@@ -136,10 +140,10 @@ var geosearch =`
 <div class="col-sm-6 col-lg-3">
 <div id="geosearch" class="advsearch_limit">
                             <fieldset>
-                                <label for="limit-yr">Geographic Search</label>
+                                <label for="limit-geo">Geographic Search</label>
                                 <input type="text" size="6" id="lat" name="lat" title="Enter Latitude" value="48.3">
                                 <input type="text" size="6" id="lng" name="lng" title="Enter Longitude" value="14.3">
-                                <input type="text" size="6" id="rad" name="radius" title="Enter Radius" value="120km">
+                                <input type="text" size="6" id="rad" name="distance" title="Enter Radius" value="120km">
                                 <div class="hint">Search for Lat/long/Radius</div>
                             </fieldset>
                         </div>

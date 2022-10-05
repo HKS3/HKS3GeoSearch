@@ -50,11 +50,13 @@ sub get {
         my $d = {};
         my $marcxml =  C4::Biblio::GetXmlBiblio( $b );
         my $record  = MARC::Record->new_from_xml( $marcxml, 'UTF-8', 'MARC21' );
-        $d->{coordinates} = [$record->field('034')->subfield("s"), $record->field('034')->subfield("t")];
-        $d->{title}       = sprintf("<a href='/cgi-bin/koha/opac-detail.pl?biblionumber=%d'>%s</a>",
+        if ( $record->field('034') ) { 
+          $d->{coordinates} = [$record->field('034')->subfield("s"), $record->field('034')->subfield("t")];
+          $d->{title}       = sprintf("<a href='/cgi-bin/koha/opac-detail.pl?biblionumber=%d'>%s</a>",
                             $b, $record->field('245')->subfield("a"));
-        push @$data, $d;
-        $i++;
+          push @$data, $d;
+          $i++;
+        } 
     }
     return $c->render( status => 200, openapi => {data => $data,  count => $i}  );
 }
