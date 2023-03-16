@@ -1,0 +1,28 @@
+Format: 1.8
+Date: Thu, 16 Mar 2023 09:35:40 +0100
+Source: koha
+Architecture: source
+Version: 22.11.50geo+20230316093537.4a7c8ed4-1
+Distribution: squeeze-dev
+Urgency: medium
+Maintainer: Mason James <mtj@kohaaloha.com>
+Changed-By: root <root@debian-koha>
+Changes:
+ koha (22.11.50geo+20230316093537.4a7c8ed4-1) squeeze-dev; urgency=medium
+ .
+   * Building git snapshot.
+Checksums-Sha1:
+ a240c9f1874434d85b6eb915ecf8825447c533bc 5095 koha_22.11.50geo+20230316093537.4a7c8ed4-1.dsc
+ 3cbce0360a7fd22d8cb3c6be06c62b98817a2ee8 99020106 koha_22.11.50geo+20230316093537.4a7c8ed4.orig.tar.gz
+ 2abf7f683ae5dba902ee8b1f6deefd060bd8d016 62632 koha_22.11.50geo+20230316093537.4a7c8ed4-1.debian.tar.xz
+ 23f6e0ae8b6c15058d9e2423a86ab61c27cb1f3e 21584 koha_22.11.50geo+20230316093537.4a7c8ed4-1_amd64.buildinfo
+Checksums-Sha256:
+ 7c3bc7de650aed9a0313629aeaa30c45b7a4e0dec66d4d3ee67344c9b6b682be 5095 koha_22.11.50geo+20230316093537.4a7c8ed4-1.dsc
+ b2305c207d4ce15797dadd069a8b626b6f031b3a62e46c9e7225e30ec57d20ee 99020106 koha_22.11.50geo+20230316093537.4a7c8ed4.orig.tar.gz
+ dd9c6c56b012665d29ff3144e7566b0e24db8e6838ec4435d0f97b32f359fa76 62632 koha_22.11.50geo+20230316093537.4a7c8ed4-1.debian.tar.xz
+ fce46d16df730091246b404f51555f16bc5102437e8d41d2494bd1f6cd650415 21584 koha_22.11.50geo+20230316093537.4a7c8ed4-1_amd64.buildinfo
+Files:
+ b57420d43d4b3da21e66755ebd11010a 5095 web optional koha_22.11.50geo+20230316093537.4a7c8ed4-1.dsc
+ 0af1c9da68dbe5879bfd8f459e6d3ec9 99020106 web optional koha_22.11.50geo+20230316093537.4a7c8ed4.orig.tar.gz
+ 4843aa2d3d2bcbee167a255e29b02d90 62632 web optional koha_22.11.50geo+20230316093537.4a7c8ed4-1.debian.tar.xz
+ 9bc4c76e94e799a6487cdafee76f5a49 21584 web optional koha_22.11.50geo+20230316093537.4a7c8ed4-1_amd64.buildinfo
