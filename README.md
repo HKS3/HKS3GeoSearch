@@ -1,4 +1,4 @@
-# HKS3Libelle
+# HKS3GeoSearch Koha Plugin
 
 This plugin lets you add Latitude/Longitude data to your books and you will see this location on a map on your koha website.
 
