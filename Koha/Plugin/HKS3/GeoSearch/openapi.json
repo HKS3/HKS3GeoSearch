@@ -1,48 +1,58 @@
 {
-  "/biblionumbers": {
-  "get": {
-      "x-mojo-to": "HKS3::GeoSearch::GeoSearchController#get",
-      "operationId": "GetCoordsByBiblionumbers",
-      "tags": ["biblios"],
-      "parameters": [{
-        "name": "bn",
-        "in": "query",
-        "description": "id",
-        "required": true,
-        "type": "array",
-        "items": { "type": "integer" }
-      }
-      ],
-      "produces": [
-        "application/json"
-      ],
-      "responses": {
-        "200": {
-          "description": "authority MARC record",
-          "schema": {
-              "type": "object",
-                "properties": {
-                  "pissed": {
-                    "description": "If the patron got pissed",
-                    "type": "boolean"
-                  }
+    "/biblionumbers": {
+        "get": {
+            "x-mojo-to": "HKS3::GeoSearch::GeoSearchController#get",
+            "operationId": "GetCoordsByBiblionumbers",
+            "tags": ["biblios"],
+            "parameters": [{
+                "name": "bn",
+                "in": "query",
+                "description": "id",
+                "required": true,
+                "type": "array",
+                "items": { "type": "integer" }
+            }],
+            "produces": [
+                "application/json"
+            ],
+            "responses": {
+                "200": {
+                    "description": "List of records matching the given biblio numbers that have coordinates stored in their MARC data",
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "data": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "bn": {
+                                            "type": "integer",
+                                            "description": "The biblio number of the record"
+                                        },
+                                        "title": {
+                                            "type": "string",
+                                            "description": "The title of the record, wrapped in an <a> tag pointing to the record in OPAC"
+                                        },
+                                        "coordinates": {
+                                            "type": "array",
+                                            "description": "Coordinates that the record describes",
+                                            "items": [
+                                                { "type": "string", "description": "Latitude" },
+                                                { "type": "string", "description": "Longitude" }
+                                            ]
+                                        }
+                                    }
+                                }
+                            },
+                            "count": {
+                                "type": "integer",
+                                "description": "Number of records returned"
+                            }
+                        }
+                    }
                 }
-          }
-        },
-        "404": {
-          "description": "An error occured",
-          "schema": {
-              "type": "object",
-                "properties": {
-                  "error": {
-                    "description": "An explanation for the error",
-                    "type": "string"
-                  }
-                }
-          }
+            }
         }
-      }
     }
-  }
 }
-
