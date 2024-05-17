@@ -1,7 +1,7 @@
 {
   "/biblionumbers": {
   "get": {
-      "x-mojo-to": "HKS3GeoSearch::GeoSearch::GeoSearchController#get",
+      "x-mojo-to": "HKS3::GeoSearch::GeoSearchController#get",
       "operationId": "GetCoordsByBiblionumbers",
       "tags": ["biblios"],
       "parameters": [{

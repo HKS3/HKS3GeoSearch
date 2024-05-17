@@ -1,4 +1,4 @@
-package Koha::Plugin::HKS3GeoSearch::GeoSearch;
+package Koha::Plugin::HKS3::GeoSearch;
 
 use Modern::Perl;
 

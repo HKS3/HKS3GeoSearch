@@ -1,4 +1,4 @@
-package Koha::Plugin::HKS3GeoSearch::GeoSearch::GeoSearchController;
+package Koha::Plugin::HKS3::GeoSearch::GeoSearchController;
 
 use utf8;
 use Mojo::Base 'Mojolicious::Controller';
