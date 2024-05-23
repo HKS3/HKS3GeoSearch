@@ -43,14 +43,21 @@ if (page === 'results') {
         }
         </style>
         <div id="geosearch" class="advsearch_limit">
-            <fieldset>
-                <label>Geographic Search</label>
-                <div id="geo_search_map"></div>
-                <input type="text" size="6" id="lat" name="lat" title="Enter Latitude" value="48">
-                <input type="text" size="6" id="lng" name="lng" title="Enter Longitude" value="13">
-                <input type="text" size="6" id="rad" name="distance" title="Enter Radius" value="120km" pattern="(\\d+)(k?m)?">
-                <div class="hint">Search for Lat/long/Radius</div>
-            </fieldset>
+            <form method="get" action="/cgi-bin/koha/opac-search.pl">
+              <fieldset>
+                  <label>Geographic Search</label>
+                  <div id="geo_search_map"></div>
+                  <input type="hidden" name="advsearch" value="1" />
+                  <input type="hidden" name="idx" value="geolocation" />
+                  <input type="hidden" name="do" value="Search" />
+                  <input id="geoquery" type="hidden" name="q" />
+                  <input type="text" size="6" id="lat" name="lat" title="Enter Latitude" value="48">
+                  <input type="text" size="6" id="lng" name="lng" title="Enter Longitude" value="13">
+                  <input type="text" size="6" id="rad" name="distance" title="Enter Radius" value="120km" pattern="(\\d+)(k?m)?">
+                  <div class="hint">Search for Lat/long/Radius</div>
+                  <input type="submit" />
+              </fieldset>
+            </form>
         </div>
     </div>`;
 
@@ -65,6 +72,14 @@ if (page === 'results') {
         let circle = L.circle([48, 13], { radius: 120_000 });
         circle.addTo(map);
 
+        function updateGeoQuery() {
+            const lat = document.querySelector('input#lat').value;
+            const lng = document.querySelector('input#lng').value;
+            const rad = document.querySelector('input#rad').value;
+
+            document.querySelector('input#geoquery').value = `lat:${lat} lng:${lng} distance:${rad}`;
+        }
+
         function resizeCircle() {
             const match = document.querySelector('input#rad').value.match(/^(\d+)(k?m)?$/);
             if (match) {
@@ -75,6 +90,7 @@ if (page === 'results') {
                 }
                 circle.setRadius(meters);
             }
+            updateGeoQuery();
         }
 
         function onMapChanged() {
@@ -86,6 +102,7 @@ if (page === 'results') {
             const center = map.getCenter();
             document.querySelector('input#lat').value = center.lat;
             document.querySelector('input#lng').value = center.lng;
+            updateGeoQuery();
         }
 
         function goToInput() {
