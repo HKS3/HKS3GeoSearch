@@ -10,7 +10,8 @@
                 "description": "id",
                 "required": true,
                 "type": "array",
-                "items": { "type": "integer" }
+                "items": { "type": "integer" },
+                "collectionFormat": "multi"
             }],
             "produces": [
                 "application/json"
