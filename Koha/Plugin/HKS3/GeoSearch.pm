@@ -58,16 +58,6 @@ sub api_namespace {
     return 'geo_search';
 }
 
-#  sub static_routes {
-#      my ( $self, $args ) = @_;
-#  
-#      my $spec_str = $self->mbf_read('staticapi.json');
-#      my $spec     = decode_json($spec_str);
-#  
-#      return $spec;
-#  }
-
-
 sub opac_head {
     my ( $self ) = @_;
 
@@ -88,85 +78,9 @@ sub opac_head {
 sub opac_js {
     my ( $self ) = @_;
 
-    my $js = <<'JS';
-    <script>
-    var page = $('body').attr('ID');
-    console.log('geo search', page);
-    if (page == 'results') {
-    $( document ).ready(function() {
-      console.log('on search page ', page);
-      $(".main").prepend('<div id="geo_search_map"></div>');
-      var map = L.map('geo_search_map').setView([48, 13], 13);
-      var tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-      }).addTo(map);
+    my $payload = $self->mbf_read('opac.js');
 
-      var biblionumbers = [];
-      $(".addtocart").each(function() {
-        console.log($(this).attr("data-biblionumber"));
-        biblionumbers.push( $(this).attr("data-biblionumber") );
-      });
-      console.log(biblionumbers);
-      if (biblionumbers.length === 0) {
-        return;
-      }
-
-      $(function(e) {
-        var ajaxData = { 'bn': biblionumbers };
-        $.ajax({
-            url: '/api/v1/contrib/geo_search/biblionumbers',
-            type: 'GET',
-            dataType: 'json',
-            data: ajaxData,
-            traditional: true
-            })
-        .done(function(data) {
-            var bounds = L.latLngBounds()
-            console.log(data['data']);
-                $.each(data['data'], function( index, value ) {
-                    console.log(value['coordinates']);
-                    var marker = L.marker(value['coordinates']).addTo(map);
-                    marker.bindPopup(index+1 + '. ' + value['title'] );
-                    bounds.extend(value['coordinates']);
-                });
-            map.fitBounds(bounds);
-            })
-        .error(function(data) {});
-        });
-    });
-    } else if (page == 'advsearch') {
-var geosearch =`
-<div class="col-sm-6 col-lg-3">
-<div id="geosearch" class="advsearch_limit">
-                            <fieldset>
-                                <label for="limit-geo">Geographic Search</label>
-                                <input type="text" size="6" id="lat" name="lat" title="Enter Latitude" value="48.3">
-                                <input type="text" size="6" id="lng" name="lng" title="Enter Longitude" value="14.3">
-                                <input type="text" size="6" id="rad" name="distance" title="Enter Radius" value="120km">
-                                <div class="hint">Search for Lat/long/Radius</div>
-                            </fieldset>
-                        </div>
-</div>
-`;
-
-        $("#advsearch_limits").append(geosearch);
-    }
-    </script>
-JS
-    
-    return $js;
-}
-
-sub intranet_js {
-    my ( $self ) = @_;
-    my $js = <<'JS';
-    <script>
-    var page = $('body').attr('ID');
-    console.log('page: ' + page);
-    </script>
-JS
-    return $js
+    return "<script> $payload </script>";
 }
 
 1;
