@@ -80,7 +80,33 @@ if (page === 'results') {
             document.querySelector('input#geoquery').value = `lat:${lat} lng:${lng} distance:${rad}`;
         }
 
-        function resizeCircle() {
+        // Whenever a map is panned by the user
+        // we instantly update the position of the displayed circle.
+        // The coordinates in inputs do not get updated instantly, since that'd trigger a map movement as well.
+        function onMapChanged() {
+            const center = map.getCenter();
+            circle.setLatLng(center);
+        }
+        map.on('move', onMapChanged);
+
+        // Whenever a user stops messing with a map (releases a mouse button)
+        // we update the input fields and the underlying query
+        function updateInputs() {
+            const center = map.getCenter();
+            document.querySelector('input#lat').value = center.lat;
+            document.querySelector('input#lng').value = center.lng;
+            updateGeoQuery();
+        }
+        map.on('mouseup', updateInputs);
+
+        // When a user manually edits coordinates/radius
+        // we update the displayed map and the underlying query.
+        function onInputUpdated() {
+            const lat = document.querySelector('input#lat').value;
+            const lng = document.querySelector('input#lng').value;
+            map.panTo([lat, lng]);
+            circle.setLatLng([lat, lng]);
+
             const match = document.querySelector('input#rad').value.match(/^(\d+)(k?m)?$/);
             if (match) {
                 const [, amount, unit] = match;
@@ -90,33 +116,11 @@ if (page === 'results') {
                 }
                 circle.setRadius(meters);
             }
+
             updateGeoQuery();
         }
-
-        function onMapChanged() {
-            const center = map.getCenter();
-            circle.setLatLng(center);
-        }
-
-        function updateInputs() {
-            const center = map.getCenter();
-            document.querySelector('input#lat').value = center.lat;
-            document.querySelector('input#lng').value = center.lng;
-            updateGeoQuery();
-        }
-
-        function goToInput() {
-            const lat = document.querySelector('input#lat').value;
-            const lng = document.querySelector('input#lng').value;
-            map.panTo([lat, lng]);
-            circle.setLatLng([lat, lng]);
-            updateGeoQuery();
-        }
-
-        map.on('move', onMapChanged);
-        map.on('mouseup', updateInputs);
-        document.querySelector('input#lat').addEventListener('input', goToInput);
-        document.querySelector('input#lng').addEventListener('input', goToInput);
-        document.querySelector('input#rad').addEventListener('input', resizeCircle);
+        document.querySelector('input#lat').addEventListener('input', onInputUpdated);
+        document.querySelector('input#lng').addEventListener('input', onInputUpdated);
+        document.querySelector('input#rad').addEventListener('input', onInputUpdated);
     });
 }
