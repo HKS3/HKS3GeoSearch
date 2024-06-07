@@ -110,6 +110,7 @@ if (page === 'results') {
             const lng = document.querySelector('input#lng').value;
             map.panTo([lat, lng]);
             circle.setLatLng([lat, lng]);
+            updateGeoQuery();
         }
 
         map.on('move', onMapChanged);
