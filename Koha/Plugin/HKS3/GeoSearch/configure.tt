@@ -1,0 +1,21 @@
+[% INCLUDE 'doc-head-open.inc' %]
+ <title>GeoSearch Plugin Configuration</title>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+<body>
+
+[% INCLUDE 'header.inc' %]
+[% INCLUDE 'cat-search.inc' %]
+
+<div id="doc3">
+
+    <h3> GeoSearch Plugin Configuration </h3>
+
+	<form method="get">
+		<input type="hidden" name="class" value="[% CLASS %]"/>
+        <input type="hidden" name="method" value="[% METHOD %]"/>
+		<label for="username"> GeoNames username </label>
+		<input type="text" name="username" value="[% username %]" />
+		<button type="submit"> Save </button>
+	</form>
+</div>

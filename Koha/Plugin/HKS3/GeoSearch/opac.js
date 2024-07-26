@@ -51,6 +51,10 @@ if (page === 'results') {
                   <input type="hidden" name="idx" value="geolocation" />
                   <input type="hidden" name="do" value="Search" />
                   <input id="geoquery" type="hidden" name="q" />
+                  <div>
+                      <input type="text" size="6" id="locationToGeocode" title="Lookup location" />
+                      <button type="button" id="lookupButton"> Lookup </button>
+                  </div>
                   <input type="text" size="6" id="lat" name="lat" title="Enter Latitude" value="48">
                   <input type="text" size="6" id="lng" name="lng" title="Enter Longitude" value="13">
                   <input type="text" size="6" id="rad" name="distance" title="Enter Radius" value="120km" pattern="(\\d+)(k?m)?">
@@ -71,6 +75,20 @@ if (page === 'results') {
 
         let circle = L.circle([48, 13], { radius: 120_000 });
         circle.addTo(map);
+
+        document.getElementById('lookupButton').onclick = () => {
+            const query = document.getElementById('locationToGeocode').value;
+            $.ajax({
+                type: 'GET',
+                url: '/api/v1/contrib/geo_search/geocode?q=' + encodeURI(query),
+                dataType: 'json',
+            }).done(data => {
+                const place = data.places[0];
+                document.querySelector('input#lat').value = place.lat;
+                document.querySelector('input#lng').value = place.lng;
+                onInputUpdated();
+            });
+        };
 
         function updateGeoQuery() {
             const lat = document.querySelector('input#lat').value;

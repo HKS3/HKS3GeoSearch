@@ -42,6 +42,21 @@ sub new {
     return $self;
 }
 
+sub configure {
+    my ( $self ) = @_;
+    my $cgi = CGI->new;
+
+    if ($cgi->param('username')) {
+        $self->store_data({ username => $cgi->param('username') });
+        $self->go_home;
+    } else {
+        my $template = $self->get_template({ file => 'configure.tt' });
+        $template->param(
+            username => $self->retrieve_data('username'),
+        );
+        $self->output_html($template->output);
+    }
+}
 
 sub api_routes {
     my ( $self, $args ) = @_;
