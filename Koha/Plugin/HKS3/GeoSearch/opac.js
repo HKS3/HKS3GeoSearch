@@ -55,9 +55,14 @@ if (page === 'results') {
                       <input type="text" size="6" id="locationToGeocode" title="Lookup location" />
                       <button type="button" id="lookupButton"> Lookup </button>
                   </div>
-                  <input type="text" size="6" id="lat" name="lat" title="Enter Latitude" value="48">
-                  <input type="text" size="6" id="lng" name="lng" title="Enter Longitude" value="13">
-                  <input type="text" size="6" id="rad" name="distance" title="Enter Radius" value="120km" pattern="(\\d+)(k?m)?">
+                  <label>
+                      <input type="checkbox" id="bboxSearch" title="Search visible area">
+                      Search visible area
+                  </label>
+                  <div class="hint">or...</div>
+                  <input type="text" size="6" id="lat" title="Enter Latitude" value="48">
+                  <input type="text" size="6" id="lng" title="Enter Longitude" value="13">
+                  <input type="text" size="6" id="rad" title="Enter Radius" value="120km" pattern="(\\d+)(k?m)?">
                   <div class="hint">Search for Lat/long/Radius</div>
                   <input type="submit" />
               </fieldset>
@@ -75,6 +80,38 @@ if (page === 'results') {
 
         let circle = L.circle([48, 13], { radius: 120_000 });
         circle.addTo(map);
+        let useBboxSearch = false;
+
+        function redrawCircle() {
+            if (circle && useBboxSearch) {
+                circle.removeFrom(map);
+                circle = undefined;
+            } else if (!useBboxSearch) {
+                if (!circle) {
+                    circle = L.circle([48, 13], { radius: 120_000 });
+                    circle.addTo(map);
+                }
+                circle.setLatLng(map.getCenter());
+
+                const match = document.querySelector('input#rad').value.match(/^(\d+)(k?m)?$/);
+                if (match) {
+                    const [, amount, unit] = match;
+                    let meters = amount;
+                    if (unit === 'km') {
+                        meters *= 1000;
+                    }
+                    circle.setRadius(meters);
+                }
+            }
+        }
+
+        document.getElementById('bboxSearch').onchange = () => {
+            useBboxSearch = document.getElementById('bboxSearch').checked;
+            document.getElementById('lat').disabled = useBboxSearch;
+            document.getElementById('lng').disabled = useBboxSearch;
+            document.getElementById('rad').disabled = useBboxSearch;
+            redrawCircle();
+        };
 
         document.getElementById('lookupButton').onclick = () => {
             const query = document.getElementById('locationToGeocode').value;
@@ -91,21 +128,27 @@ if (page === 'results') {
         };
 
         function updateGeoQuery() {
-            const lat = document.querySelector('input#lat').value;
-            const lng = document.querySelector('input#lng').value;
-            const rad = document.querySelector('input#rad').value;
+            if (useBboxSearch) {
+                const bounds = map.getBounds();
+                document.querySelector('input#geoquery').value = 'boundingbox:' + [
+                    bounds.getNorthWest().lat,
+                    bounds.getNorthWest().lng,
+                    bounds.getSouthEast().lat,
+                    bounds.getSouthEast().lng,
+                ].join(',');
+            } else {
+                const lat = document.querySelector('input#lat').value;
+                const lng = document.querySelector('input#lng').value;
+                const rad = document.querySelector('input#rad').value;
 
-            document.querySelector('input#geoquery').value = `lat:${lat} lng:${lng} distance:${rad}`;
+                document.querySelector('input#geoquery').value = `lat:${lat} lng:${lng} distance:${rad}`;
+            }
         }
 
         // Whenever a map is panned by the user
         // we instantly update the position of the displayed circle.
         // The coordinates in inputs do not get updated instantly, since that'd trigger a map movement as well.
-        function onMapChanged() {
-            const center = map.getCenter();
-            circle.setLatLng(center);
-        }
-        map.on('move', onMapChanged);
+        map.on('move', redrawCircle);
 
         // Whenever a user stops messing with a map (releases a mouse button)
         // we update the input fields and the underlying query
@@ -123,18 +166,8 @@ if (page === 'results') {
             const lat = document.querySelector('input#lat').value;
             const lng = document.querySelector('input#lng').value;
             map.panTo([lat, lng]);
-            circle.setLatLng([lat, lng]);
 
-            const match = document.querySelector('input#rad').value.match(/^(\d+)(k?m)?$/);
-            if (match) {
-                const [, amount, unit] = match;
-                let meters = amount;
-                if (unit === 'km') {
-                    meters *= 1000;
-                }
-                circle.setRadius(meters);
-            }
-
+            redrawCircle();
             updateGeoQuery();
         }
         document.querySelector('input#lat').addEventListener('input', onInputUpdated);
