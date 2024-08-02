@@ -46,13 +46,27 @@ sub configure {
     my ( $self ) = @_;
     my $cgi = CGI->new;
 
-    if ($cgi->param('username')) {
-        $self->store_data({ username => $cgi->param('username') });
+    if (
+        $cgi->param('username')
+        or $cgi->param('defaultPosition_lat')
+        or $cgi->param('defaultPosition_lon')
+        or $cgi->param('useGeolocation')
+    ) {
+        $self->store_data({
+            username            => $cgi->param('username'),
+            defaultPosition_lat => $cgi->param('defaultPosition_lat'),
+            defaultPosition_lon => $cgi->param('defaultPosition_lon'),
+            useGeolocation      => $cgi->param('useGeolocation') // 0,
+        });
         $self->go_home;
     } else {
         my $template = $self->get_template({ file => 'configure.tt' });
         $template->param(
-            username => $self->retrieve_data('username'),
+            leaflet_inc         => $self->mbf_read('leaflet.inc'),
+            username            => $self->retrieve_data('username'),
+            defaultPosition_lat => $self->retrieve_data('defaultPosition_lat'),
+            defaultPosition_lon => $self->retrieve_data('defaultPosition_lon'),
+            useGeolocation      => $self->retrieve_data('useGeolocation'),
         );
         $self->output_html($template->output);
     }
@@ -76,26 +90,23 @@ sub api_namespace {
 sub opac_head {
     my ( $self ) = @_;
 
-    return q|
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.1/dist/leaflet.css"
-   integrity="sha256-sA+zWATbFveLLNqWO2gtiw3HL/lh1giY/Inf1BJ0z14="
-   crossorigin=""/>
-<script src="https://unpkg.com/leaflet@1.9.1/dist/leaflet.js"
-   integrity="sha256-NDI0K41gVbWqfkkaHj15IzU7PtMoelkzyKp8TOaFQ3s="
-   crossorigin=""></script>
-<style>
-#geo_search_map { height: 400px; }
-</style>
-|;
+    return $self->mbf_read('leaflet.inc');
 }
 
 
 sub opac_js {
     my ( $self ) = @_;
 
-    my $payload = $self->mbf_read('opac.js');
+    my $template = $self->get_template({ file => 'opac_js.tt' });
+    $template->param(
+        useGeolocation => $self->retrieve_data('useGeolocation') ? 1 : 0,
+        defaultPosition => [
+            $self->retrieve_data('defaultPosition_lat') // 48,
+            $self->retrieve_data('defaultPosition_lon') // 13,
+        ],
+    );
 
-    return "<script> $payload </script>";
+    return '<script>' . $template->output . '</script>';
 }
 
 1;

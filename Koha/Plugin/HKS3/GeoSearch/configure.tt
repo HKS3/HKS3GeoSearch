@@ -1,6 +1,12 @@
 [% INCLUDE 'doc-head-open.inc' %]
- <title>GeoSearch Plugin Configuration</title>
+	<title>GeoSearch Plugin Configuration</title>
 [% INCLUDE 'doc-head-close.inc' %]
+
+[% leaflet_inc %]
+<style>
+    #geo_search_map { width: 600px; }
+</style>
+
 </head>
 <body>
 
@@ -9,13 +15,77 @@
 
 <div id="doc3">
 
-    <h3> GeoSearch Plugin Configuration </h3>
+	<h3> GeoSearch Plugin Configuration </h3>
 
 	<form method="get">
 		<input type="hidden" name="class" value="[% CLASS %]"/>
-        <input type="hidden" name="method" value="[% METHOD %]"/>
-		<label for="username"> GeoNames username </label>
-		<input type="text" name="username" value="[% username %]" />
+		<input type="hidden" name="method" value="[% METHOD %]"/>
+
+		<div>
+			<label> GeoNames username
+				<input type="text" name="username" value="[% username %]" />
+			</label>
+		</div>
+
+		<div>
+			<label>
+				Default map position (click to set)
+				<div id="geo_search_map"></div>
+				<label>
+					Latitude:
+					<input type="text" id="defaultPosition_lat" name="defaultPosition_lat" value="[% defaultPosition_lat %]" />
+				</label>
+				<label>
+					Longitude:
+					<input type="text" id="defaultPosition_lon" name="defaultPosition_lon" value="[% defaultPosition_lon %]" />
+				</label>
+			</label>
+		</div>
+
+		<div>
+			<label> Use Geolocation (if available) for default map position
+				<input type="checkbox" name="useGeolocation" [% IF useGeolocation %] checked [% END %] />
+			</label>
+		</div>
+
 		<button type="submit"> Save </button>
 	</form>
 </div>
+
+<script>
+    const map = L.map('geo_search_map');
+	[% IF defaultPosition_lat && defaultPosition_lon %]
+		map.setView([[% defaultPosition_lat %], [% defaultPosition_lon %]], 5);
+	[% ELSE %]
+		map.setView([48, 13], 5);
+	[% END %]
+    const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+
+	const marker = L.marker([map.getCenter().lat, map.getCenter().lng]);
+	marker.addTo(map);
+
+	function updateMarker(pos) {
+		marker.setLatLng(pos);
+        document.querySelector('input#defaultPosition_lat').value = pos.lat;
+        document.querySelector('input#defaultPosition_lon').value = pos.lng;
+	}
+
+	map.on('click', (ev) => {
+        map.panTo(ev.latlng);
+        updateMarker(ev.latlng);
+	});
+
+    // When a user manually edits coordinates
+    // we update the displayed map
+    function onInputUpdated() {
+        const lat = document.querySelector('input#defaultPosition_lat').value;
+        const lng = document.querySelector('input#defaultPosition_lon').value;
+        map.panTo([lat, lng]);
+        updateMarker([lat, lng]);
+    }
+    document.querySelector('input#defaultPosition_lat').addEventListener('input', onInputUpdated);
+    document.querySelector('input#defaultPosition_lon').addEventListener('input', onInputUpdated);
+</script>

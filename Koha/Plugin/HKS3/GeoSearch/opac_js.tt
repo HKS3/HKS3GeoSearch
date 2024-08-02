@@ -1,8 +1,10 @@
+[% USE To %]
+
 const page = $('body').attr('ID');
 if (page === 'results') {
     $(document).ready(function() {
         $(".main").prepend('<div id="geo_search_map"></div>');
-        var map = L.map('geo_search_map').setView([48, 13], 13);
+        var map = L.map('geo_search_map').setView([% To.json(defaultPosition) %], 13);
         var tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -60,8 +62,8 @@ if (page === 'results') {
                       Search visible area
                   </label>
                   <div class="hint">or...</div>
-                  <input type="text" size="6" id="lat" title="Enter Latitude" value="48">
-                  <input type="text" size="6" id="lng" title="Enter Longitude" value="13">
+                  <input type="text" size="6" id="lat" title="Enter Latitude" value="[% defaultPosition.0 %]">
+                  <input type="text" size="6" id="lng" title="Enter Longitude" value="[% defaultPosition.1 %]">
                   <input type="text" size="6" id="rad" title="Enter Radius" value="120km" pattern="(\\d+)(k?m)?">
                   <div class="hint">Search for Lat/long/Radius</div>
                   <input type="submit" />
@@ -72,13 +74,14 @@ if (page === 'results') {
 
     $("#advsearch_limits").append(geosearch);
     $(document).ready(function() {
-        var map = L.map('geo_search_map').setView([48, 13], 5);
+        let viewAdjusted = false;
+        var map = L.map('geo_search_map').setView([% To.json(defaultPosition) %], 5);
         var tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         }).addTo(map);
 
-        let circle = L.circle([48, 13], { radius: 120_000 });
+        let circle = L.circle([% To.json(defaultPosition) %], { radius: 120_000 });
         circle.addTo(map);
         let useBboxSearch = false;
 
@@ -88,7 +91,7 @@ if (page === 'results') {
                 circle = undefined;
             } else if (!useBboxSearch) {
                 if (!circle) {
-                    circle = L.circle([48, 13], { radius: 120_000 });
+                    circle = L.circle([% To.json(defaultPosition) %], { radius: 120_000 });
                     circle.addTo(map);
                 }
                 circle.setLatLng(map.getCenter());
@@ -111,6 +114,7 @@ if (page === 'results') {
             document.getElementById('lng').disabled = useBboxSearch;
             document.getElementById('rad').disabled = useBboxSearch;
             redrawCircle();
+            updateGeoQuery();
         };
 
         document.getElementById('lookupButton').onclick = () => {
@@ -143,6 +147,7 @@ if (page === 'results') {
 
                 document.querySelector('input#geoquery').value = `lat:${lat} lng:${lng} distance:${rad}`;
             }
+            viewAdjusted = true;
         }
 
         // Whenever a map is panned by the user
@@ -173,5 +178,21 @@ if (page === 'results') {
         document.querySelector('input#lat').addEventListener('input', onInputUpdated);
         document.querySelector('input#lng').addEventListener('input', onInputUpdated);
         document.querySelector('input#rad').addEventListener('input', onInputUpdated);
+
+        if ([% useGeolocation %]) {
+            navigator.geolocation.getCurrentPosition(
+                pos => {
+                    if (viewAdjusted) {
+                        // user has used the map already, don't ruin it
+                        return;
+                    }
+                    map.panTo([pos.coords.latitude, pos.coords.longitude]);
+                },
+                err => {
+                    console.warn(`Failed to obtain user's location (Error ${err.code}, "${err.message}"), using the preconfigured default`);
+                },
+                { timeout: 5000 },
+            );
+        }
     });
 }
