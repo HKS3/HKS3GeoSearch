@@ -18,6 +18,8 @@ if (page === 'results') {
             return;
         }
 
+        const coordEntries = new Map();
+
         $(function(e) {
             var ajaxData = { 'bn': biblionumbers };
             $.ajax({
@@ -29,11 +31,24 @@ if (page === 'results') {
             }).done(function(data) {
                 var bounds = L.latLngBounds()
                 $.each(data['data'], function( index, value ) {
-                    var marker = L.marker(value['coordinates']).addTo(map);
-                    marker.bindPopup(index+1 + '. ' + value['title'] );
+                    const coordHash = value.coordinates.join(':');
+
+                    let entries = coordEntries.get(coordHash);
+                    if (!entries) {
+                        entries = [];
+                        coordEntries.set(coordHash, entries);
+                    }
+                    entries.push(value);
+
                     bounds.extend(value['coordinates']);
                 });
                 map.fitBounds(bounds);
+
+                for (const entries of coordEntries.values()) {
+                    const marker = L.marker(entries[0]['coordinates']).addTo(map);
+                    const content = entries.map((e, i) => `${i}. ${e.title}`).join('<br />');
+                    marker.bindPopup(content);
+                }
             }).error(function(data) {});
         });
     });
