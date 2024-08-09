@@ -90,7 +90,8 @@ sub api_namespace {
 sub opac_head {
     my ( $self ) = @_;
 
-    return $self->mbf_read('leaflet.inc');
+    my $components = '<script>' . $self->mbf_read('components.js') . '</script>';
+    return $components . $self->mbf_read('leaflet.inc');
 }
 
 

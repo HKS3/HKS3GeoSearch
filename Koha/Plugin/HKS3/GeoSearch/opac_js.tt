@@ -3,12 +3,7 @@
 const page = $('body').attr('ID');
 if (page === 'results') {
     $(document).ready(function() {
-        $(".main").prepend('<div id="geo_search_map"></div>');
-        var map = L.map('geo_search_map').setView([% To.json(defaultPosition) %], 13);
-        var tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        }).addTo(map);
+        $(".main").prepend('<geosearch-results />');
 
         var biblionumbers = [];
         $(".addtocart").each(function() {
@@ -17,8 +12,6 @@ if (page === 'results') {
         if (biblionumbers.length === 0) {
             return;
         }
-
-        const coordEntries = new Map();
 
         $(function(e) {
             var ajaxData = { 'bn': biblionumbers };
@@ -29,26 +22,7 @@ if (page === 'results') {
                 data: ajaxData,
                 traditional: true
             }).done(function(data) {
-                var bounds = L.latLngBounds()
-                $.each(data['data'], function( index, value ) {
-                    const coordHash = value.coordinates.join(':');
-
-                    let entries = coordEntries.get(coordHash);
-                    if (!entries) {
-                        entries = [];
-                        coordEntries.set(coordHash, entries);
-                    }
-                    entries.push(value);
-
-                    bounds.extend(value['coordinates']);
-                });
-                map.fitBounds(bounds);
-
-                for (const entries of coordEntries.values()) {
-                    const marker = L.marker(entries[0]['coordinates']).addTo(map);
-                    const content = entries.map((e, i) => `${i}. ${e.title}`).join('<br />');
-                    marker.bindPopup(content);
-                }
+                document.querySelector('geosearch-results').setAttribute('entries', JSON.stringify(data));
             }).error(function(data) {});
         });
     });
