@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+  <head>
+      <title> GeoSearch component test </title>
+      <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.1/dist/leaflet.css"
+         integrity="sha256-sA+zWATbFveLLNqWO2gtiw3HL/lh1giY/Inf1BJ0z14="
+         crossorigin=""/>
+
+      <script src="https://unpkg.com/leaflet@1.9.1/dist/leaflet.js"
+         integrity="sha256-NDI0K41gVbWqfkkaHj15IzU7PtMoelkzyKp8TOaFQ3s="
+         crossorigin=""></script>
+
+      <style>
+          .geo_search_map {
+              height: 400px;
+              width: 600px;
+          }
+      </style>
+
+      <script src="./Koha/Plugin/HKS3/GeoSearch/components.js" defer></script>
+  </head>
+  <body>
+      <p>
+          Important: this needs to run under an HTTP server for the custom components to load. <br>
+          Try <pre>python3 -m http.server</pre>
+      </p>
+      <div>
+          <h1> Search form </h1>
+          <h3> (Geoquery artificially made visible) </h3>
+
+          <geosearch-form
+              defaultPosition='["52", "21"]'
+              useGeolocation="true"
+          />
+
+          <script>
+          document.addEventListener("DOMContentLoaded", () => {
+              document.querySelector('input#geoquery').setAttribute('type', 'text');
+              document.querySelector('input#geoquery').setAttribute('readonly', '');
+              document.querySelector('input#geoquery').style.width = '100%';
+          });
+          </script>
+      </div>
+
+      <div>
+          <h1> Results map </h1>
+
+          <geosearch-results
+              entries="{&quot;count&quot;:5,&quot;data&quot;:[{&quot;bn&quot;:5,&quot;coordinates&quot;:[&quot;48&quot;,&quot;16&quot;],&quot;title&quot;:&quot;<a href='/cgi-bin/koha/opac-detail.pl?biblionumber=5'>Perl best practices /</a>&quot;},{&quot;bn&quot;:11,&quot;coordinates&quot;:[&quot;48.1&quot;,&quot;16.1&quot;],&quot;title&quot;:&quot;<a href='/cgi-bin/koha/opac-detail.pl?biblionumber=11'>CGI programming with Perl /</a>&quot;},{&quot;bn&quot;:255,&quot;coordinates&quot;:[&quot;47.9&quot;,&quot;15.9&quot;],&quot;title&quot;:&quot;<a href='/cgi-bin/koha/opac-detail.pl?biblionumber=255'>Perl template toolkit /</a>&quot;},{&quot;bn&quot;:7,&quot;coordinates&quot;:[&quot;48&quot;,&quot;16&quot;],&quot;title&quot;:&quot;<a href='/cgi-bin/koha/opac-detail.pl?biblionumber=7'>Conspirator :</a>&quot;},{&quot;bn&quot;:6,&quot;coordinates&quot;:[&quot;48&quot;,&quot;16&quot;],&quot;title&quot;:&quot;<a href='/cgi-bin/koha/opac-detail.pl?biblionumber=6'>X Power Tools</a>&quot;}]}"
+          />
+      </div>
+  </body>
+</html>
