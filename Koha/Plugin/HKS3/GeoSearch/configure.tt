@@ -4,7 +4,10 @@
 
 [% leaflet_inc %]
 <style>
-    #geo_search_map { width: 600px; }
+    #geo_search_map {
+		height: 400px;
+		width: 600px;
+	}
 </style>
 
 </head>
