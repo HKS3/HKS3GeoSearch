@@ -7,5 +7,5 @@
    crossorigin=""></script>
 
 <style>
-    #geo_search_map { height: 400px; }
+    .geo_search_map { height: 400px; }
 </style>

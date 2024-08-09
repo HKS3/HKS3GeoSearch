@@ -37,7 +37,7 @@ if (page === 'results') {
             <form method="get" action="/cgi-bin/koha/opac-search.pl">
               <fieldset>
                   <label>Geographic Search</label>
-                  <div id="geo_search_map"></div>
+                  <div id="geo_search_map" class="geo_search_map"></div>
                   <input type="hidden" name="advsearch" value="1" />
                   <input type="hidden" name="idx" value="geolocation" />
                   <input type="hidden" name="do" value="Search" />

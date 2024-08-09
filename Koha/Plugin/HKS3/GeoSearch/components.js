@@ -1,11 +1,13 @@
 class GeoSearchResults extends HTMLElement {
     constructor() {
         super();
-        this.innerHTML = '<div id="geo_search_map"></div>';
+        this.mapContainer = document.createElement('div');
+        this.mapContainer.setAttribute('class', 'geo_search_map');
+        this.appendChild(this.mapContainer);
     }
 
     connectedCallback() {
-        this.map = L.map('geo_search_map').setView([48, 13], 13);
+        this.map = L.map(this.mapContainer).setView([48, 13], 13);
         const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
