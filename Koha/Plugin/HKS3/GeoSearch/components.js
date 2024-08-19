@@ -182,7 +182,9 @@ class GeoSearchResults extends HTMLElement {
         this.mapContainer = document.createElement('div');
         this.mapContainer.setAttribute('class', 'geo_search_map');
         this.appendChild(this.mapContainer);
+    }
 
+    connectedCallback() {
         this.map = L.map(this.mapContainer).setView([48, 13], 13);
         const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
@@ -196,7 +198,6 @@ class GeoSearchResults extends HTMLElement {
 
     attributeChangedCallback(name, oldValue, newValue) {
         if (name === 'entries' && newValue != oldValue) {
-            console.log(JSON.parse(newValue));
             this.drawMarkers(JSON.parse(newValue));
         }
     }
