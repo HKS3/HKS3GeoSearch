@@ -3,27 +3,40 @@
 const page = $('body').attr('ID');
 if (page === 'results') {
     $(document).ready(function() {
-        $(".main").prepend('<geosearch-results />');
+        $(".main").prepend('<geosearch-results id="geosearch" />');
 
         var biblionumbers = [];
         $(".addtocart").each(function() {
             biblionumbers.push( $(this).attr("data-biblionumber") );
         });
         if (biblionumbers.length === 0) {
-            return;
+            document.querySelector('geosearch-results').setAttribute('entries', JSON.stringify({ data: [] }));
+        } else {
+            $(function(e) {
+                var ajaxData = { 'bn': biblionumbers };
+                $.ajax({
+                    url: '/api/v1/contrib/geo_search/biblionumbers',
+                    type: 'GET',
+                    dataType: 'json',
+                    data: ajaxData,
+                    traditional: true
+                }).done(function(data) {
+                    document.querySelector('geosearch-results').setAttribute('entries', JSON.stringify(data));
+                }).error(function(data) {});
+            });
         }
 
-        $(function(e) {
-            var ajaxData = { 'bn': biblionumbers };
-            $.ajax({
-                url: '/api/v1/contrib/geo_search/biblionumbers',
-                type: 'GET',
-                dataType: 'json',
-                data: ajaxData,
-                traditional: true
-            }).done(function(data) {
-                document.querySelector('geosearch-results').setAttribute('entries', JSON.stringify(data));
-            }).error(function(data) {});
+        $(document).ready(function() {
+            document.getElementById('geosearch').addEventListener('map-moved', (ev) => {
+                const bounds = ev.detail.bounds;
+                const query = 'boundingbox:' + [
+                    bounds.getNorthWest().lat,
+                    bounds.getNorthWest().lng,
+                    bounds.getSouthEast().lat,
+                    bounds.getSouthEast().lng,
+                ].join(',');
+                document.location.href = '/cgi-bin/koha/opac-search.pl?advsearch=1&idx=geolocation&do=Search&q=' + encodeURI(query);
+            });
         });
     });
 } else if (page == 'advsearch') {

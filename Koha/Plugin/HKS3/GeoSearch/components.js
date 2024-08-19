@@ -218,13 +218,23 @@ class GeoSearchResults extends HTMLElement {
 
             bounds.extend(value['coordinates']);
         }
-        this.map.fitBounds(bounds);
+        if (bounds.isValid()) { // won't be if we have no results
+            this.map.fitBounds(bounds);
+        }
 
         for (const entries of coordEntries.values()) {
             const marker = L.marker(entries[0]['coordinates']).addTo(this.map);
             const content = entries.map((e, i) => `${i}. ${e.title}`).join('<br />');
             marker.bindPopup(content);
         }
+
+        this.map.on('moveend', () => {
+            this.dispatchEvent(new CustomEvent('map-moved', {
+                bubbles: true,
+                cancellable: true,
+                detail: { center: this.map.getCenter(), bounds: this.map.getBounds() },
+            }));
+        });
     }
 }
 
