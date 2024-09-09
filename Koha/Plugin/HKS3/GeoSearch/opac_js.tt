@@ -3,6 +3,9 @@
 const page = $('body').attr('ID');
 if (page === 'results') {
     $(document).ready(function() {
+        const urlParams = new URLSearchParams(window.location.search)
+        if (urlParams.get('idx') !== 'geolocation') return;
+
         $(".main").prepend('<geosearch-results id="geosearch" />');
 
         var biblionumbers = [];
