@@ -23,15 +23,38 @@ sub get_biblionumbers {
     for my $biblio_number (@$biblionumbers) {
         my $marcxml = C4::Biblio::GetXmlBiblio( $biblio_number );
         my $record  = MARC::Record->new_from_xml( $marcxml, 'UTF-8', 'MARC21' );
-        if ( $record->field('034') ) { 
-            push @data, {
-                bn => $biblio_number,
-                coordinates => [ $record->field('034')->subfield("s"), $record->field('034')->subfield("t") ],
-                title => sprintf(
-                    "<a href='/cgi-bin/koha/opac-detail.pl?biblionumber=%d'>%s</a>",
-                    $biblio_number, $record->field('245')->subfield("a")
-                ),
-            };
+        my $geofield = $record->field('034');
+        if ($geofield) {
+            my $title = sprintf(
+                "<a href='/cgi-bin/koha/opac-detail.pl?biblionumber=%d'>%s</a>",
+                $biblio_number, $record->field('245')->subfield("a")
+            );
+
+            my $lat = $geofield->subfield('s');
+            my $lng = $geofield->subfield('t');
+            if ($lat and $lng) {
+                push @data, {
+                    bn => $biblio_number,
+                    coordinates => [ $lat, $lng ],
+                    title => $title,
+                };
+                next;
+            }
+
+            my $west  = $geofield->subfield('d');
+            my $east  = $geofield->subfield('e');
+            my $north = $geofield->subfield('f');
+            my $south = $geofield->subfield('g');
+            if ($west and $east and $north and $south) {
+                push @data, {
+                    bn => $biblio_number,
+                    bounds => [
+                        [ 0+$north, 0+$west ],
+                        [ 0+$south, 0+$east ]
+                    ],
+                    title => $title,
+                };
+            }
         } 
     }
 

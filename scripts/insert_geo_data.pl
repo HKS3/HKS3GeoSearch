@@ -47,4 +47,21 @@ sub biblio_add_geo_point {
    C4::Biblio::ModBiblio($record, $biblionumber, $framework);
 }
 
+# Add the bounding box of Austria to a biblio
+{
+  my $biblionumber = 139;
+  my $biblio = Koha::Biblios->find($biblionumber);
+  my $framework = $biblio->frameworkcode;
+  my $record = $biblio->metadata->record;
+  my @fields;
+  $fields[0] = MARC::Field->new('034','','',
+     'd' => 9.530833,
+     'e' => 17.160556,
+     'f' => 49.020556,
+     'g' => 46.3725,
+  );
+  $record->append_fields(@fields);
+  C4::Biblio::ModBiblio($record, $biblionumber, $framework);
+}
+
 # http://kohadev.mydnsname.org:8080/cgi-bin/koha/opac-search.pl?advsearch=1&idx=geolocation&q=lat:48+lng:16+distance:100km&do=Search

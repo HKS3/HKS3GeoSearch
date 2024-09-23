@@ -207,7 +207,12 @@ class GeoSearchResults extends HTMLElement {
         const coordEntries = new Map();
 
         for (const value of entries.data) {
-            const coordHash = value.coordinates.join(':');
+            let coordHash;
+            if (value.coordinates) {
+                coordHash = value.coordinates.join(':');
+            } else {
+                coordHash = value.bounds.flat().join(':');
+            }
 
             let entries = coordEntries.get(coordHash);
             if (!entries) {
@@ -216,16 +221,27 @@ class GeoSearchResults extends HTMLElement {
             }
             entries.push(value);
 
-            bounds.extend(value['coordinates']);
+            if (value.coordinates) {
+                bounds.extend(value.coordinates);
+            } else {
+                bounds.extend(value.bounds[0]);
+                bounds.extend(value.bounds[1]);
+            }
         }
         if (bounds.isValid()) { // won't be if we have no results
             this.map.fitBounds(bounds);
         }
 
         for (const entries of coordEntries.values()) {
-            const marker = L.marker(entries[0]['coordinates']).addTo(this.map);
-            const content = entries.map((e, i) => `${i}. ${e.title}`).join('<br />');
-            marker.bindPopup(content);
+            if (entries[0].coordinates) {
+                const marker = L.marker(entries[0].coordinates).addTo(this.map);
+                const content = entries.map((e, i) => `${i}. ${e.title}`).join('<br />');
+                marker.bindPopup(content);
+            } else {
+                const rect = L.rectangle(entries[0].bounds).addTo(this.map);
+                const content = entries.map((e, i) => `${i}. ${e.title}`).join('<br />');
+                rect.bindPopup(content);
+            }
         }
 
         this.map.on('moveend', () => {
