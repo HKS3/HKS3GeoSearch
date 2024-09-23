@@ -6,6 +6,7 @@ use JSON;
 
 use Koha::Plugin::HKS3::GeoSearch;
 
+use C4::AuthoritiesMarc;
 use C4::Biblio;
 use MARC::File::XML ( DefaultEncoding => 'utf8' );
 use Koha::Caches;
@@ -13,6 +14,32 @@ use Koha::Plugins::Datas;
 
 sub cache {
     return Koha::Caches->get_instance(__PACKAGE__);
+}
+
+sub get_record_location {
+    my $record = shift;
+    my $geofield = $record->field('034');
+
+    if ($geofield) {
+        my $lat = $geofield->subfield('s');
+        my $lng = $geofield->subfield('t');
+        if ($lat and $lng) {
+            return { coordinates => [ $lat, $lng ] };
+        }
+
+        my $west  = $geofield->subfield('d');
+        my $east  = $geofield->subfield('e');
+        my $north = $geofield->subfield('f');
+        my $south = $geofield->subfield('g');
+        if ($west and $east and $north and $south) {
+            return {
+                bounds => [
+                    [ 0+$north, 0+$west ],
+                    [ 0+$south, 0+$east ]
+                ],
+            };
+        }
+    }
 }
 
 sub get_biblionumbers {
@@ -23,38 +50,28 @@ sub get_biblionumbers {
     for my $biblio_number (@$biblionumbers) {
         my $marcxml = C4::Biblio::GetXmlBiblio( $biblio_number );
         my $record  = MARC::Record->new_from_xml( $marcxml, 'UTF-8', 'MARC21' );
-        my $geofield = $record->field('034');
-        if ($geofield) {
+        my $location = get_record_location($record);
+
+        if (!$location) {
+            warn "No location found for $biblio_number, checking authority";
+            my $authid = $record->subfield('651', '9');
+            warn "Authid is $authid";
+            if ($authid) {
+                my $authrecord = C4::AuthoritiesMarc::GetAuthority( $authid );
+                $location = get_record_location($authrecord);
+            }
+        }
+
+        if ($location) {
             my $title = sprintf(
                 "<a href='/cgi-bin/koha/opac-detail.pl?biblionumber=%d'>%s</a>",
                 $biblio_number, $record->field('245')->subfield("a")
             );
-
-            my $lat = $geofield->subfield('s');
-            my $lng = $geofield->subfield('t');
-            if ($lat and $lng) {
-                push @data, {
-                    bn => $biblio_number,
-                    coordinates => [ $lat, $lng ],
-                    title => $title,
-                };
-                next;
-            }
-
-            my $west  = $geofield->subfield('d');
-            my $east  = $geofield->subfield('e');
-            my $north = $geofield->subfield('f');
-            my $south = $geofield->subfield('g');
-            if ($west and $east and $north and $south) {
-                push @data, {
-                    bn => $biblio_number,
-                    bounds => [
-                        [ 0+$north, 0+$west ],
-                        [ 0+$south, 0+$east ]
-                    ],
-                    title => $title,
-                };
-            }
+            push @data, {
+                bn => $biblio_number,
+                title => $title,
+                %$location,
+            };
         } 
     }
 
