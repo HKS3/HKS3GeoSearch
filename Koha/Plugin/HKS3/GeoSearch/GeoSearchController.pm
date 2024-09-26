@@ -16,21 +16,48 @@ sub cache {
     return Koha::Caches->get_instance(__PACKAGE__);
 }
 
+sub decimalize {
+    my $coord = shift;
+
+    if ($coord =~ /^[NEWS]/) {
+        my ($hemi, $hours, $minutes, $seconds) = $coord =~ /^([NEWS])\s*(\d{,3})\s*(\d{,2})\s*(\d{,2})$/;
+        if ($hours) {
+            my $decimal = $hours + $minutes/60 + $seconds/3600;
+            if ($hemi =~ /[SW]/) {
+                $decimal *= -1;
+            }
+            return $decimal;
+        } elsif ($coord =~ /^([NEWS])(\d+\.\d+)$/) {
+            # Already in mostly-decimal
+            my $decimal = $2;
+            if ($1 =~ /[SW]/) {
+                $decimal *= -1;
+            }
+            return $decimal;
+        } else {
+            warn "Unrecognized coordinate format: '$coord'";
+            return;
+        }
+    }
+
+    return $coord;
+}
+
 sub get_record_location {
     my $record = shift;
     my $geofield = $record->field('034');
 
     if ($geofield) {
-        my $lat = $geofield->subfield('s');
-        my $lng = $geofield->subfield('t');
+        my $lat = decimalize($geofield->subfield('s'));
+        my $lng = decimalize($geofield->subfield('t'));
         if ($lat and $lng) {
             return { coordinates => [ $lat, $lng ] };
         }
 
-        my $west  = $geofield->subfield('d');
-        my $east  = $geofield->subfield('e');
-        my $north = $geofield->subfield('f');
-        my $south = $geofield->subfield('g');
+        my $west  = decimalize($geofield->subfield('d'));
+        my $east  = decimalize($geofield->subfield('e'));
+        my $north = decimalize($geofield->subfield('f'));
+        my $south = decimalize($geofield->subfield('g'));
         if ($west and $east and $north and $south) {
             return {
                 bounds => [
