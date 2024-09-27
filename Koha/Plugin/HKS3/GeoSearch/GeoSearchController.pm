@@ -143,12 +143,7 @@ sub get_geocode {
             name => $_->{name},
             countryName => $_->{countryName},
             countryCode => $_->{countryCode},
-            bbox => {
-                north => $_->{bbox}{north},
-                east  => $_->{bbox}{east},
-                west  => $_->{bbox}{west},
-                south => $_->{bbox}{south},
-            },
+            %{ $_->{bbox} ? { bbox => $_->{bbox} } : {} },
         }
     } $results->{geonames}->@*;
 
