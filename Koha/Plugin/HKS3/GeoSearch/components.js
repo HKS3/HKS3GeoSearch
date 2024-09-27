@@ -182,6 +182,20 @@ class GeoSearchResults extends HTMLElement {
         this.mapContainer = document.createElement('div');
         this.mapContainer.setAttribute('class', 'geo_search_map');
         this.appendChild(this.mapContainer);
+
+        this.buttonContainer = document.createElement('div');
+        this.buttonContainer.setAttribute('class', 'leaflet-bottom leaflet-left');
+        this.mapContainer.appendChild(this.buttonContainer);
+
+        this.reSearchButton = document.createElement('button');
+        this.reSearchButton.textContent = 'Search the visible area';
+        this.reSearchButton.style.pointerEvents = 'auto'; // leaflet-* overrides this
+        this.reSearchButton.onclick = () => this.dispatchEvent(new CustomEvent('search-requested', {
+            bubbles: true,
+            cancellable: true,
+            detail: { center: this.map.getCenter(), bounds: this.map.getBounds() },
+        }));
+        this.buttonContainer.appendChild(this.reSearchButton);
     }
 
     connectedCallback() {
@@ -243,14 +257,6 @@ class GeoSearchResults extends HTMLElement {
                 rect.bindPopup(content);
             }
         }
-
-        this.map.on('moveend', () => {
-            this.dispatchEvent(new CustomEvent('map-moved', {
-                bubbles: true,
-                cancellable: true,
-                detail: { center: this.map.getCenter(), bounds: this.map.getBounds() },
-            }));
-        });
     }
 }
 

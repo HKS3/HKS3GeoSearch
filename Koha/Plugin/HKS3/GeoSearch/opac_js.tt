@@ -30,9 +30,7 @@ if (page === 'results') {
         }
 
         $(document).ready(function() {
-            /*
-            // Disabling this for now, the UX is unbearable. To be redesigned
-            document.getElementById('geosearch').addEventListener('map-moved', (ev) => {
+            document.getElementById('geosearch').addEventListener('search-requested', (ev) => {
                 const bounds = ev.detail.bounds;
                 const query = 'boundingbox:' + [
                     bounds.getNorthWest().lat,
@@ -42,7 +40,6 @@ if (page === 'results') {
                 ].join(',');
                 document.location.href = '/cgi-bin/koha/opac-search.pl?advsearch=1&idx=geolocation&do=Search&q=' + encodeURI(query);
             });
-            */
         });
     });
 } else if (page == 'advsearch') {
