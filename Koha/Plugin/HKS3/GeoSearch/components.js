@@ -245,6 +245,9 @@ class GeoSearchResults extends HTMLElement {
         }
         if (bounds.isValid()) { // won't be if we have no results
             this.map.fitBounds(bounds);
+            if (this.map.getZoom() > 10) {
+                this.map.setZoom(10);
+            }
         }
 
         for (const entries of coordEntries.values()) {
