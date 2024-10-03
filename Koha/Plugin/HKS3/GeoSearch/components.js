@@ -1,3 +1,12 @@
+const defaultMapConfig = {
+    url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+    tileLayerOpts: {
+        maxZoom: 19,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    },
+    maxInitialResultsZoom: 10,
+};
+
 class GeoSearchForm extends HTMLElement {
     constructor() {
         super();
@@ -34,6 +43,10 @@ class GeoSearchForm extends HTMLElement {
         return JSON.parse(this.getAttribute('defaultPosition'));
     }
 
+    get mapConfig() {
+        return this.getAttribute('mapConfig') ? JSON.parse(this.getAttribute('mapConfig')) : defaultMapConfig;
+    }
+
     get useBboxSearch() {
         return this.getElementById('bboxSearch').checked;
     }
@@ -42,10 +55,7 @@ class GeoSearchForm extends HTMLElement {
         this.viewAdjusted = false;
         const mapContainer = this.querySelector('div.geo_search_map');
         this.map = L.map(mapContainer).setView(this.defaultPosition, 5);
-        const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        }).addTo(this.map);
+        L.tileLayer(this.mapConfig.url, this.mapConfig.tileLayerOpts).addTo(this.map);
 
         this.querySelector('input#lat').value = this.defaultPosition[0];
         this.querySelector('input#lng').value = this.defaultPosition[1];
@@ -199,12 +209,13 @@ class GeoSearchResults extends HTMLElement {
         this.buttonContainer.appendChild(this.reSearchButton);
     }
 
+    get mapConfig() {
+        return this.getAttribute('mapConfig') ? JSON.parse(this.getAttribute('mapConfig')) : defaultMapConfig;
+    }
+
     connectedCallback() {
         this.map = L.map(this.mapContainer).setView([48, 13], 13);
-        const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        }).addTo(this.map);
+        L.tileLayer(this.mapConfig.url, this.mapConfig.tileLayerOpts).addTo(this.map);
     }
 
     static get observedAttributes() {
@@ -245,8 +256,8 @@ class GeoSearchResults extends HTMLElement {
         }
         if (bounds.isValid()) { // won't be if we have no results
             this.map.fitBounds(bounds);
-            if (this.map.getZoom() > 10) {
-                this.map.setZoom(10);
+            if (this.map.getZoom() > this.mapConfig.maxInitialResultsZoom) {
+                this.map.setZoom(this.mapConfig.maxInitialResultsZoom);
             }
         }
 

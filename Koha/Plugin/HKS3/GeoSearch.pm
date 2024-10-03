@@ -13,7 +13,7 @@ use C4::Context;
 use C4::Koha;
 use Koha::AuthorisedValues;
 
-use Mojo::JSON qw(decode_json);;
+use Mojo::JSON qw(decode_json encode_json);
 
 our $VERSION = "0.7";
 
@@ -51,6 +51,7 @@ sub configure {
         or $cgi->param('defaultPosition_lat')
         or $cgi->param('defaultPosition_lon')
         or $cgi->param('useGeolocation')
+        or $cgi->param('useMapConfig')
     ) {
         my $radius = $cgi->param('defaultSearchRadius');
         if ($radius =~ /km$/) {
@@ -59,16 +60,33 @@ sub configure {
             $radius += 0; # numify
         }
 
+        my $mapConfig;
+        if ($cgi->param('useMapConfig')) {
+            $mapConfig->{url} = $cgi->param('mapConfigUrl');
+            $mapConfig->{tileLayerOpts} = decode_json($cgi->param('mapConfigLeafletOpts'));
+            $mapConfig->{maxInitialResultsZoom} = $cgi->param('mapConfigMaxInitialResultsZoom');
+        }
+
         $self->store_data({
             username            => $cgi->param('username'),
             defaultPosition_lat => $cgi->param('defaultPosition_lat'),
             defaultPosition_lon => $cgi->param('defaultPosition_lon'),
             defaultSearchRadius => $radius,
             useGeolocation      => $cgi->param('useGeolocation') // 0,
+            mapConfig           => ($mapConfig && encode_json($mapConfig)),
         });
         $self->go_home;
     } else {
         my $template = $self->get_template({ file => 'configure.tt' });
+        my $mapConfigJson = $self->retrieve_data('mapConfig');
+        my %params;
+        if ($mapConfigJson) {
+            my $mapConfig = decode_json($mapConfigJson);
+            $params{useMapConfig} = 1;
+            $params{mapConfigUrl} = $mapConfig->{url};
+            $params{mapConfigLeafletOpts} = encode_json($mapConfig->{tileLayerOpts});
+            $params{mapConfigMaxInitialResultsZoom} = $mapConfig->{maxInitialResultsZoom};
+        }
         $template->param(
             leaflet_inc         => $self->mbf_read('leaflet.inc'),
             username            => $self->retrieve_data('username'),
@@ -76,6 +94,7 @@ sub configure {
             defaultPosition_lon => $self->retrieve_data('defaultPosition_lon'),
             defaultSearchRadius => $self->retrieve_data('defaultSearchRadius'),
             useGeolocation      => $self->retrieve_data('useGeolocation'),
+            %params,
         );
         $self->output_html($template->output);
     }
@@ -115,6 +134,7 @@ sub opac_js {
             $self->retrieve_data('defaultPosition_lon') || 13,
         ],
         defaultSearchRadius => $self->retrieve_data('defaultSearchRadius') || 30_000,
+        mapConfig => $self->retrieve_data('mapConfig'),
     );
 
     return '<script>' . $template->output . '</script>';

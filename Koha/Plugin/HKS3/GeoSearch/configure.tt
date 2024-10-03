@@ -55,21 +55,56 @@
 			</label>
 		</div>
 
+		<div>
+			<label>
+				Use custom Map settings
+				<input type="checkbox" name="useMapConfig" [% IF useMapConfig %] checked [% END %] />
+			</label>
+			<br>
+			<label>
+				Map tile URL
+				<input type="text" id="mapConfigUrl" name="mapConfigUrl" value="[% mapConfigUrl %]" />
+			</label>
+			<br>
+			<label>
+				Leaflet tileLayer options (JSON)
+				<textarea id="mapConfigLeafletOpts" name="mapConfigLeafletOpts"> [% mapConfigLeafletOpts %] </textarea>
+			</label>
+			<br>
+			<label>
+				Maximum initial zoom level when displaying search results
+				<input type="text" id="mapConfigMaxInitialResultsZoom" name="mapConfigMaxInitialResultsZoom" value="[% mapConfigMaxInitialResultsZoom %]" />
+			</label>
+			<button id="mapSettingsPreview" type="button"> Preview </button>
+		</div>
 		<button type="submit"> Save </button>
 	</form>
 </div>
 
 <script>
+	function previewSettings() {
+		map.eachLayer(l => map.removeLayer(l));
+	    L.tileLayer(
+			document.getElementById('mapConfigUrl').value,
+			JSON.parse(document.getElementById('mapConfigLeafletOpts').value),
+		).addTo(map);
+		map.setZoom(document.getElementById('mapConfigMaxInitialResultsZoom').value);
+	}
+	document.getElementById('mapSettingsPreview').onclick = previewSettings;
     const map = L.map('geo_search_map');
 	[% IF defaultPosition_lat && defaultPosition_lon %]
 		map.setView([[% defaultPosition_lat %], [% defaultPosition_lon %]], 5);
 	[% ELSE %]
 		map.setView([48, 13], 5);
 	[% END %]
-    const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+	[% IF useMapConfig %]
+	previewSettings();
+	[% ELSE %]
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(map);
+	[% END %]
 
 	const marker = L.marker([map.getCenter().lat, map.getCenter().lng]);
 	marker.addTo(map);
