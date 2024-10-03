@@ -59,12 +59,16 @@ sub get_record_location {
         my $north = decimalize($geofield->subfield('f'));
         my $south = decimalize($geofield->subfield('g'));
         if ($west and $east and $north and $south) {
-            return {
-                bounds => [
-                    [ 0+$north, 0+$west ],
-                    [ 0+$south, 0+$east ]
-                ],
-            };
+            if ($north == $south and $east == $west) {
+                return { coordinates => [ $north, $east] };
+            } else {
+                return {
+                    bounds => [
+                        [ 0+$north, 0+$west ],
+                        [ 0+$south, 0+$east ]
+                    ],
+                };
+            }
         }
     }
 }
