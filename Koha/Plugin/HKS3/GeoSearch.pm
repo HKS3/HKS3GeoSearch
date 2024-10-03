@@ -52,10 +52,18 @@ sub configure {
         or $cgi->param('defaultPosition_lon')
         or $cgi->param('useGeolocation')
     ) {
+        my $radius = $cgi->param('defaultSearchRadius');
+        if ($radius =~ /km$/) {
+            $radius *= 1000;
+        } else {
+            $radius += 0; # numify
+        }
+
         $self->store_data({
             username            => $cgi->param('username'),
             defaultPosition_lat => $cgi->param('defaultPosition_lat'),
             defaultPosition_lon => $cgi->param('defaultPosition_lon'),
+            defaultSearchRadius => $radius,
             useGeolocation      => $cgi->param('useGeolocation') // 0,
         });
         $self->go_home;
@@ -66,6 +74,7 @@ sub configure {
             username            => $self->retrieve_data('username'),
             defaultPosition_lat => $self->retrieve_data('defaultPosition_lat'),
             defaultPosition_lon => $self->retrieve_data('defaultPosition_lon'),
+            defaultSearchRadius => $self->retrieve_data('defaultSearchRadius'),
             useGeolocation      => $self->retrieve_data('useGeolocation'),
         );
         $self->output_html($template->output);
@@ -102,9 +111,10 @@ sub opac_js {
     $template->param(
         useGeolocation => $self->retrieve_data('useGeolocation') ? 1 : 0,
         defaultPosition => [
-            $self->retrieve_data('defaultPosition_lat') // 48,
-            $self->retrieve_data('defaultPosition_lon') // 13,
+            $self->retrieve_data('defaultPosition_lat') || 48,
+            $self->retrieve_data('defaultPosition_lon') || 13,
         ],
+        defaultSearchRadius => $self->retrieve_data('defaultSearchRadius') || 30_000,
     );
 
     return '<script>' . $template->output . '</script>';

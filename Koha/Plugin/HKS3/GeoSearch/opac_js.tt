@@ -52,6 +52,7 @@ if (page === 'results') {
         <geosearch-form
             id="geosearch"
             class="advsearch_limit"
+            defaultSearchRadius='[% defaultSearchRadius %]'
             defaultPosition='[% To.json(defaultPosition) %]'
             [% IF useGeolocation %]
             useGeolocation="true"

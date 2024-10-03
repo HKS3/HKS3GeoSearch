@@ -22,7 +22,7 @@ class GeoSearchForm extends HTMLElement {
             <div class="hint">or...</div>
             <input type="text" size="6" id="lat" title="Enter Latitude">
             <input type="text" size="6" id="lng" title="Enter Longitude">
-            <input type="text" size="6" id="rad" title="Enter Radius" value="120km" pattern="(\\d+)(k?m)?">
+            <input type="text" size="6" id="rad" title="Enter Radius" pattern="(\\d+)(k?m)?">
             <div class="hint">Search for Lat/long/Radius</div>
             <input type="submit" />
         </fieldset>
@@ -49,8 +49,9 @@ class GeoSearchForm extends HTMLElement {
 
         this.querySelector('input#lat').value = this.defaultPosition[0];
         this.querySelector('input#lng').value = this.defaultPosition[1];
+        this.querySelector('input#rad').value = this.getAttribute('defaultSearchRadius') / 1000 + 'km';
 
-        this.circle = L.circle(this.defaultPosition, { radius: 120_000 });
+        this.circle = L.circle(this.defaultPosition, { radius: this.getAttribute('defaultSearchRadius') });
         this.circle.addTo(this.map);
 
         // Whenever a map is panned by the user
@@ -132,7 +133,7 @@ class GeoSearchForm extends HTMLElement {
             this.circle = undefined;
         } else if (!this.useBboxSearch) {
             if (!this.circle) {
-                this.circle = L.circle(this.defaultPosition, { radius: 120_000 });
+                this.circle = L.circle(this.defaultPosition, { radius: this.getAttribute('defaultSearchRadius') });
                 this.circle.addTo(this.map);
             }
             this.circle.setLatLng(this.map.getCenter());

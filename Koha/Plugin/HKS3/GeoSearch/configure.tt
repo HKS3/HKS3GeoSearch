@@ -43,6 +43,10 @@
 					<input type="text" id="defaultPosition_lon" name="defaultPosition_lon" value="[% defaultPosition_lon %]" />
 				</label>
 			</label>
+			<label>
+				Default search radius
+	            <input type="text" size="6" name="defaultSearchRadius" pattern="(\d+)(k?m)?" value="[% defaultSearchRadius %]">
+			</label>
 		</div>
 
 		<div>
