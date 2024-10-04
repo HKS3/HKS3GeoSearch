@@ -46,13 +46,7 @@ sub configure {
     my ( $self ) = @_;
     my $cgi = CGI->new;
 
-    if (
-        $cgi->param('username')
-        or $cgi->param('defaultPosition_lat')
-        or $cgi->param('defaultPosition_lon')
-        or $cgi->param('useGeolocation')
-        or $cgi->param('useMapConfig')
-    ) {
+    if ($cgi->param('submit') eq 'Save') {
         my $radius = $cgi->param('defaultSearchRadius');
         if ($radius =~ /km$/) {
             $radius *= 1000;
@@ -74,6 +68,7 @@ sub configure {
             defaultSearchRadius => $radius,
             useGeolocation      => $cgi->param('useGeolocation') // 0,
             mapConfig           => ($mapConfig && encode_json($mapConfig)),
+            languageCode        => $cgi->param('languageCode'),
         });
         $self->go_home;
     } else {
@@ -94,6 +89,7 @@ sub configure {
             defaultPosition_lon => $self->retrieve_data('defaultPosition_lon'),
             defaultSearchRadius => $self->retrieve_data('defaultSearchRadius'),
             useGeolocation      => $self->retrieve_data('useGeolocation'),
+            languageCode        => $self->retrieve_data('languageCode'),
             %params,
         );
         $self->output_html($template->output);
@@ -135,6 +131,7 @@ sub opac_js {
         ],
         defaultSearchRadius => $self->retrieve_data('defaultSearchRadius') || 30_000,
         mapConfig => $self->retrieve_data('mapConfig'),
+        languageCode => $self->retrieve_data('languageCode'),
     );
 
     return '<script>' . $template->output . '</script>';

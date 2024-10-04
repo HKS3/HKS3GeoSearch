@@ -10,6 +10,9 @@ if (page === 'results') {
             [% IF mapConfig %]
             mapConfig='[% To.json(mapConfig) %]'
             [% END %]
+            [% IF languageCode %]
+            languageCode='[% languageCode %]'
+            [% END %]
         />`);
 
         var biblionumbers = [];
@@ -63,6 +66,9 @@ if (page === 'results') {
             [% END %]
             [% IF mapConfig %]
             mapConfig='[% To.json(mapConfig) %]'
+            [% END %]
+            [% IF languageCode %]
+            languageCode='[% languageCode %]'
             [% END %]
         />
     </div>`;

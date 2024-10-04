@@ -7,6 +7,21 @@ const defaultMapConfig = {
     maxInitialResultsZoom: 10,
 };
 
+const translations = {
+    'de-AT': {
+        'Lookup': 'Ortssuche',
+        'Search for Lat/long/Radius': 'Suche nach Koordinaten Lat/long im Umkreis (Radius)',
+        'Submit': 'Suchen',
+        'Search the visible area': 'Suche im Kartenausschnitt',
+    },
+};
+
+function translateString(str, languageCode) {
+    const dict = translations[languageCode];
+    if (!dict) return str; // fallback
+    return dict[str] || str; // and another fallback
+}
+
 class GeoSearchForm extends HTMLElement {
     constructor() {
         super();
@@ -22,21 +37,30 @@ class GeoSearchForm extends HTMLElement {
             <input id="geoquery" type="hidden" name="q" />
             <div>
                 <input type="text" size="6" id="locationToGeocode" title="Lookup location" />
-                <button type="button" id="lookupButton"> Lookup </button>
+                <button type="button" id="lookupButton" />
             </div>
             <label>
-                <input type="checkbox" id="bboxSearch" title="Search visible area">
-                Search visible area
+                <input type="checkbox" id="bboxSearch" />
+                <span id="bboxSearchLabel" />
             </label>
             <div class="hint">or...</div>
             <input type="text" size="6" id="lat" title="Enter Latitude">
             <input type="text" size="6" id="lng" title="Enter Longitude">
             <input type="text" size="6" id="rad" title="Enter Radius" pattern="(\\d+)(k?m)?">
-            <div class="hint">Search for Lat/long/Radius</div>
-            <input type="submit" />
+            <div id="submitHint" class="hint"></div>
+            <input id="submitButton" type="submit" />
         </fieldset>
         `;
         this.appendChild(this.form);
+    }
+
+    translate(languageCode) {
+        const tr = (s) => translateString(s, languageCode);
+        this.getElementById('lookupButton').textContent    = tr('Lookup');
+        this.getElementById('bboxSearchLabel').title       = tr('Search the visible area');
+        this.getElementById('bboxSearchLabel').textContent = tr('Search the visible area');
+        this.getElementById('submitHint').textContent      = tr('Search for Lat/long/Radius');
+        this.getElementById('submitButton').value          = tr('Submit');
     }
 
     get defaultPosition() {
@@ -52,6 +76,8 @@ class GeoSearchForm extends HTMLElement {
     }
 
     connectedCallback() {
+        this.translate(this.getAttribute('languageCode'));
+
         this.viewAdjusted = false;
         const mapContainer = this.querySelector('div.geo_search_map');
         this.map = L.map(mapContainer).setView(this.defaultPosition, 5);
@@ -209,11 +235,18 @@ class GeoSearchResults extends HTMLElement {
         this.buttonContainer.appendChild(this.reSearchButton);
     }
 
+    translate(languageCode) {
+        const tr = (s) => translateString(s, languageCode);
+        this.reSearchButton.textContent = tr('Search the visible area');
+    }
+
     get mapConfig() {
         return this.getAttribute('mapConfig') ? JSON.parse(this.getAttribute('mapConfig')) : defaultMapConfig;
     }
 
     connectedCallback() {
+        this.translate(this.getAttribute('languageCode'));
+
         this.map = L.map(this.mapContainer).setView([48, 13], 13);
         L.tileLayer(this.mapConfig.url, this.mapConfig.tileLayerOpts).addTo(this.map);
     }
