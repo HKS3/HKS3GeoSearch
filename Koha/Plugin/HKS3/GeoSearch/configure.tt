@@ -77,7 +77,7 @@
 			<br>
 			<label>
 				Leaflet tileLayer options (JSON)
-				<textarea id="mapConfigLeafletOpts" name="mapConfigLeafletOpts"> [% mapConfigLeafletOpts %] </textarea>
+				<textarea id="mapConfigLeafletOpts" name="mapConfigLeafletOpts"> [% mapConfigLeafletOpts | html %] </textarea>
 			</label>
 			<br>
 			<label>
