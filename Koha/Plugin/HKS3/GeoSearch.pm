@@ -15,13 +15,13 @@ use Koha::AuthorisedValues;
 
 use Mojo::JSON qw(decode_json encode_json);
 
-our $VERSION = "0.8";
+our $VERSION = "0.9";
 
 our $metadata = {
     name            => 'GeoSearch Plugin',
     author          => 'Mark Hofstetter',
     date_authored   => '2022-09-24',
-    date_updated    => "2024-10-03",
+    date_updated    => "2024-10-04",
     minimum_version => '22.05.00.000',
     maximum_version => undef,
     version         => $VERSION,
