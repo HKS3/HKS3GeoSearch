@@ -297,11 +297,11 @@ class GeoSearchResults extends HTMLElement {
         for (const entries of coordEntries.values()) {
             if (entries[0].coordinates) {
                 const marker = L.marker(entries[0].coordinates).addTo(this.map);
-                const content = entries.map((e, i) => `${i}. ${e.title}`).join('<br />');
+                const content = entries.map((e, i) => `${i + 1}. ${e.title}`).join('<br />');
                 marker.bindPopup(content);
             } else {
                 const rect = L.rectangle(entries[0].bounds).addTo(this.map);
-                const content = entries.map((e, i) => `${i}. ${e.title}`).join('<br />');
+                const content = entries.map((e, i) => `${i + 1}. ${e.title}`).join('<br />');
                 rect.bindPopup(content);
             }
         }
