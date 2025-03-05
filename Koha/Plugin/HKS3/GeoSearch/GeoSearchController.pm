@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use Mojo::Base 'Mojolicious::Controller';
 use JSON;
+use Koha::SearchEngine::Elasticsearch;
 
 use Koha::Plugin::HKS3::GeoSearch;
 
@@ -84,12 +85,15 @@ sub get_biblionumbers {
         my $location = get_record_location($record);
 
         if (!$location) {
-            warn "No location found for $biblio_number, checking authority";
-            my $authid = $record->subfield('651', '9');
-            warn "Authid is $authid";
-            if ($authid) {
-                my $authrecord = C4::AuthoritiesMarc::GetAuthority( $authid );
-                $location = get_record_location($authrecord);
+            for my $field ($record->field('651')) {
+                my $authid = $field->subfield('9');
+                if ($authid) {
+                    my $auth = Koha::MetadataRecord::Authority->get_from_authid($authid);
+                    if (Koha::SearchEngine::Elasticsearch->_should_embed($auth)) {
+                        $location = get_record_location($auth->record);
+                        last;
+                    }
+                }
             }
         }
 
