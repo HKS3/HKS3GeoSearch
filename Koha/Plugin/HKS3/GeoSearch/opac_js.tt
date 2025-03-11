@@ -15,26 +15,20 @@ if (page === 'results') {
             [% END %]
         />`);
 
-        var biblionumbers = [];
-        $(".addtocart").each(function() {
-            biblionumbers.push( $(this).attr("data-biblionumber") );
-        });
-        if (biblionumbers.length === 0) {
-            document.querySelector('geosearch-results').setAttribute('entries', JSON.stringify({ data: [] }));
-        } else {
-            $(function(e) {
-                var ajaxData = { 'bn': biblionumbers };
-                $.ajax({
-                    url: '/api/v1/contrib/geo_search/biblionumbers',
-                    type: 'GET',
-                    dataType: 'json',
-                    data: ajaxData,
-                    traditional: true
-                }).done(function(data) {
-                    document.querySelector('geosearch-results').setAttribute('entries', JSON.stringify(data));
-                }).error(function(data) {});
-            });
+        const entries = [];
+        for (const record of document.querySelectorAll('span.geolocation')) {
+            const bn = record.getAttribute('data-biblionumber');
+            const title = `<a href="/cgi-bin/koha/opac-detail.pl?biblionumber=${bn}">${record.getAttribute('data-title')}</a>`;
+            const coordinates = JSON.parse(record.getAttribute('data-geolocation')) || [];
+            const bounds = JSON.parse(record.getAttribute('data-geolocation-area')) || [];
+            for (const coord of coordinates) {
+                entries.push({ bn, title, coordinates: coord });
+            }
+            for (const bbox of bounds) {
+                entries.push({ bn, title, bounds: bbox });
+            }
         }
+        document.querySelector('geosearch-results').setAttribute('entries', JSON.stringify({ data: entries }));
 
         $(document).ready(function() {
             document.getElementById('geosearch').addEventListener('search-requested', (ev) => {

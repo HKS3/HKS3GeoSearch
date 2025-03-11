@@ -295,13 +295,24 @@ class GeoSearchResults extends HTMLElement {
         }
 
         for (const entries of coordEntries.values()) {
+            // Our backend may currently return duplicate coordinates per item.
+            // We dedup them here for the time being
+            const seen_biblionumbers = new Set();
+            const filtered_entries = [];
+            for (const entry of entries) {
+                if (!seen_biblionumbers.has(entry.bn)) {
+                    filtered_entries.push(entry);
+                    seen_biblionumbers.add(entry.bn);
+                }
+            }
+
             if (entries[0].coordinates) {
                 const marker = L.marker(entries[0].coordinates).addTo(this.map);
-                const content = entries.map((e, i) => `${i + 1}. ${e.title}`).join('<br />');
+                const content = filtered_entries.map((e, i) => `${i + 1}. ${e.title}`).join('<br />');
                 marker.bindPopup(content);
             } else {
                 const rect = L.rectangle(entries[0].bounds).addTo(this.map);
-                const content = entries.map((e, i) => `${i + 1}. ${e.title}`).join('<br />');
+                const content = filtered_entries.map((e, i) => `${i + 1}. ${e.title}`).join('<br />');
                 rect.bindPopup(content);
             }
         }
